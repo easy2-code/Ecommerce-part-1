@@ -9,7 +9,7 @@ import ContactPage from "./pages/ContactPage";
 
 export default function App() {
   return (
-    <BrowserRouter basename="/your-repo-name">
+    <BrowserRouter basename="/Ecommerce-part-1">
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
