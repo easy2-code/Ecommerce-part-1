@@ -146,7 +146,7 @@ export default function Header() {
                 endIcon={<ArrowDropDownIcon />}
                 sx={navSx}
               >
-                Pages
+                Page
               </Button>
 
               {/* Pages dropdown menu */}
