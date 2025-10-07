@@ -1,9 +1,12 @@
 import React from "react";
 import { AppBar, Toolbar, Button, Box, Menu, MenuItem } from "@mui/material";
+import { useState, useRef, useEffect } from "react";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import LocalGroceryStoreIcon from "@mui/icons-material/LocalGroceryStore";
 import { Link } from "react-router-dom";
 import Logo from "../assets/imgs/image.png";
+import SignInModal from "./SignInModal";
+import SignUpModal from "./SignUpModal";
 
 export default function Header() {
   // State for controlling "Grocery" dropdown menu
@@ -15,6 +18,9 @@ export default function Header() {
   // Reference to the "Pages" button (used to anchor the dropdown)
   const pagesBtnRef = React.useRef(null);
 
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
+
   // Handlers for Grocery dropdown
   const openGrocery = (event) => setAnchorEl(event.currentTarget);
   const closeGrocery = () => setAnchorEl(null);
@@ -24,10 +30,8 @@ export default function Header() {
   const closePages = () => setPagesAnchorEl(null);
 
   // Detect scroll to add shadow and background color to AppBar
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -56,7 +60,14 @@ export default function Header() {
         {/* ================= Left Section: Logo + Grocery ================= */}
         <Box className="flex items-center space-x-4">
           {/* Logo */}
-          <img src={Logo} alt="PickBazar Logo" className="h-8 w-auto" />
+          <Link to="/">
+            <img
+              src={Logo}
+              alt="PickBazar Logo"
+              className="h-8 w-auto cursor-pointer"
+            />
+          </Link>
+
           {/* Grocery dropdown button */}
           <Button
             variant="outlined"
@@ -237,9 +248,11 @@ export default function Header() {
             variant="contained"
             className="!bg-[#10645b] hover:!bg-[#0e544d] normal-case rounded-lg shadow-none !mr-5"
             sx={{ textTransform: "none" }}
+            onClick={() => setShowSignIn(true)}
           >
             Join
           </Button>
+
           <Button
             variant="contained"
             className="!bg-[#10645b] hover:!bg-[#0e544d] normal-case rounded-lg shadow-none"
@@ -249,6 +262,26 @@ export default function Header() {
           </Button>
         </Box>
       </Toolbar>
+      {/* ===== Modals ===== */}
+      {showSignIn && (
+        <SignInModal
+          onClose={() => setShowSignIn(false)}
+          onSwitch={() => {
+            setShowSignIn(false);
+            setShowSignUp(true);
+          }}
+        />
+      )}
+
+      {showSignUp && (
+        <SignUpModal
+          onClose={() => setShowSignUp(false)}
+          onSwitch={() => {
+            setShowSignUp(false);
+            setShowSignIn(true);
+          }}
+        />
+      )}
     </AppBar>
   );
 }
