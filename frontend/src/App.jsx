@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Header from "./components/Header";
@@ -9,7 +9,7 @@ import ContactPage from "./pages/ContactPage";
 
 export default function App() {
   return (
-    <BrowserRouter basename="/Ecommerce-part-1">
+    <>
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -17,6 +17,6 @@ export default function App() {
         <Route path="/offers" element={<OfferPage />} />
         <Route path="/contact" element={<ContactPage />} />
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }
