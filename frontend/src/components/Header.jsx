@@ -92,6 +92,7 @@ export default function Header() {
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={closeGrocery}
+            disableScrollLock
           >
             <MenuItem
               onClick={closeGrocery}
@@ -156,6 +157,7 @@ export default function Header() {
                 onClose={closePages}
                 anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
                 transformOrigin={{ vertical: "top", horizontal: "left" }}
+                disableScrollLock
                 MenuListProps={{
                   onMouseEnter: () => openPages(pagesBtnRef.current),
                   onMouseLeave: closePages,
