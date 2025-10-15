@@ -2,8 +2,10 @@ import React from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Sidebar from "./Sidebar";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addItem } from "../redux/cartSlice";
 
-// ✅ Dummy product data (static for now, could later come from API)
+// Dummy product data (static for now, could later come from API)
 const products = [
   {
     name: "Apples",
@@ -90,6 +92,12 @@ const products = [
 ];
 
 export default function ProductLayout() {
+  const dispatch = useDispatch();
+
+  const handleAddToCart = (product) => {
+    dispatch(addItem(product));
+  };
+
   // State to control how many products are visible at once
   const [visibleCount, setVisibleCount] = useState(6); // show 6 products first
   // State to store selected product image for modal
@@ -168,7 +176,10 @@ export default function ProductLayout() {
                     )}
                   </div>
                   {/* Add to Cart Button */}
-                  <button className="flex items-center gap-2 border border-[#10645b] text-[#10645b] bg-white hover:bg-[#0e544d] hover:text-white transition px-4 py-2 rounded text-sm font-medium">
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="flex items-center gap-2 border border-[#10645b] text-[#10645b] bg-white hover:bg-[#0e544d] hover:text-white transition px-4 py-2 rounded text-sm font-medium"
+                  >
                     <ShoppingCartIcon fontSize="small" />
                     Cart
                   </button>
