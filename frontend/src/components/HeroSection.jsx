@@ -21,10 +21,11 @@ export default function HeroSection() {
 
   return (
     <div
-      className="relative bg-[#f9f9f9] h-[90vh] flex flex-col justify-center px-6 md:px-12 text-center overflow-hidden"
+      className="relative bg-[#f9f9f9] h-[60vh] flex flex-col justify-center  text-center overflow-hidden"
       style={{
         backgroundImage: `url(${BgImage})`,
-        backgroundSize: "cover",
+        backgroundSize: "contain", // fit entire image
+        backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
       }}
     >

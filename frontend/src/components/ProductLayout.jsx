@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Sidebar from "./Sidebar";
-import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addItem } from "../redux/cartSlice";
+import { Drawer, IconButton, useMediaQuery, useTheme } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 
-// Dummy product data (static for now, could later come from API)
+// Dummy products array (your existing data)
 const products = [
   {
     name: "Apples",
@@ -93,55 +94,62 @@ const products = [
 
 export default function ProductLayout() {
   const dispatch = useDispatch();
+  const [visibleCount, setVisibleCount] = useState(6);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleAddToCart = (product) => {
-    dispatch(addItem(product));
-  };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // State to control how many products are visible at once
-  const [visibleCount, setVisibleCount] = useState(6); // show 6 products first
-  // State to store selected product image for modal
-  const [selectedImage, setSelectedImage] = useState(null); // modal image
-
-  // Load more products (increments by 6 each click)
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 6); // load 6 more each click
-  };
-
-  // Open modal with clicked product image
-  const openModal = (img) => {
-    setSelectedImage(img);
-  };
-
-  // Close modal
-  const closeModal = () => {
-    setSelectedImage(null);
-  };
+  const handleAddToCart = (product) => dispatch(addItem(product));
+  const handleLoadMore = () => setVisibleCount((prev) => prev + 6);
+  const openModal = (img) => setSelectedImage(img);
+  const closeModal = () => setSelectedImage(null);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex flex-col md:flex-row h-screen">
       {/* ---------- Sidebar Section ---------- */}
-      <aside className="w-64 h-screen bg-gray-50 shadow-md overflow-y-auto">
-        <Sidebar />
-      </aside>
+      {isMobile ? (
+        <>
+          <IconButton
+            onClick={() => setSidebarOpen(true)}
+            className="m-4 text-[#10645b]"
+          >
+            <MenuIcon fontSize="large" />
+          </IconButton>
+
+          <Drawer
+            anchor="left"
+            open={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          >
+            <div className="w-64 p-4 h-full">
+              <Sidebar />
+            </div>
+          </Drawer>
+        </>
+      ) : (
+        <aside className="w-64 h-screen bg-gray-50 shadow-md overflow-y-auto">
+          <Sidebar />
+        </aside>
+      )}
 
       {/* ---------- Product Grid Section ---------- */}
-      <main className="flex-1 bg-gray-100 px-6 md:px-12 py-10 overflow-y-auto hide-scrollbar">
-        {/* Product Cards */}
+      <main className="flex-1 bg-gray-100 px-4 sm:px-6 md:px-12 py-10 overflow-y-auto hide-scrollbar">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {products.slice(0, visibleCount).map((product, idx) => (
             <div
               key={idx}
               className="bg-white rounded-lg shadow p-4 flex flex-col relative h-80"
             >
-              {/* Discount Badge (if available) */}
+              {/* Discount Badge */}
               {product.discount && (
                 <span className="absolute top-2 right-2 bg-yellow-400 text-white text-xs font-bold px-2 py-1 rounded">
                   {product.discount}
                 </span>
               )}
 
-              {/* Product Image (click to open modal) */}
+              {/* Product Image */}
               <div
                 className="w-full h-40 flex items-center justify-center mb-3 cursor-pointer"
                 onClick={() => openModal(product.img)}
@@ -152,13 +160,14 @@ export default function ProductLayout() {
                   className="max-h-full object-contain"
                 />
               </div>
+
               {/* Product Details */}
               <div className="flex-1 flex flex-col">
                 <h3 className="font-semibold text-gray-800">{product.name}</h3>
                 <p className="text-sm text-gray-500">{product.weight}</p>
+
                 {/* Price + Add to Cart */}
                 <div className="mt-auto flex justify-between items-center">
-                  {/* Pricing (discount handling) */}
                   <div className="flex flex-col items-start">
                     {product.discountPrice ? (
                       <>
@@ -175,7 +184,7 @@ export default function ProductLayout() {
                       </span>
                     )}
                   </div>
-                  {/* Add to Cart Button */}
+
                   <button
                     onClick={() => handleAddToCart(product)}
                     className="flex items-center gap-2 border border-[#10645b] text-[#10645b] bg-white hover:bg-[#0e544d] hover:text-white transition px-4 py-2 rounded text-sm font-medium"
@@ -189,7 +198,7 @@ export default function ProductLayout() {
           ))}
         </div>
 
-        {/* ---------- Load More Button ---------- */}
+        {/* Load More Button */}
         {visibleCount < products.length && (
           <div className="flex justify-center mt-8">
             <button
@@ -205,15 +214,13 @@ export default function ProductLayout() {
       {/* ---------- Modal (Enlarged Image) ---------- */}
       {selectedImage && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 mt-20"
+          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-lg overflow-hidden shadow-lg"
-            style={{ width: "600px", height: "500px" }} // fixed size
-            onClick={(e) => e.stopPropagation()} // prevent close on inner click
+            className="bg-white rounded-lg overflow-hidden shadow-lg w-11/12 sm:w-3/4 md:w-2/3 lg:w-1/2 max-h-[90%]"
+            onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header (Close button) */}
             <div className="flex justify-end p-2">
               <button
                 onClick={closeModal}
@@ -222,7 +229,6 @@ export default function ProductLayout() {
                 ×
               </button>
             </div>
-            {/* Modal Content (Image) */}
             <div className="flex justify-center items-center p-4 h-[calc(100%-48px)]">
               <img
                 src={selectedImage}

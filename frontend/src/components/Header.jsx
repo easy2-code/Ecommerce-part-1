@@ -1,6 +1,21 @@
-import React from "react";
-import { AppBar, Toolbar, Button, Box, Menu, MenuItem } from "@mui/material";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Box,
+  Menu,
+  MenuItem,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Collapse,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import LocalGroceryStoreIcon from "@mui/icons-material/LocalGroceryStore";
 import { Link } from "react-router-dom";
@@ -9,34 +24,33 @@ import SignInModal from "./SignInModal";
 import SignUpModal from "./SignUpModal";
 
 export default function Header() {
-  // State for controlling "Grocery" dropdown menu
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  // State for controlling "Pages" dropdown menu
-  const [pagesAnchorEl, setPagesAnchorEl] = React.useState(null);
-  // State to track if the page has scrolled (for AppBar style changes)
-  const [scrolled, setScrolled] = React.useState(false);
-  // Reference to the "Pages" button (used to anchor the dropdown)
-  const pagesBtnRef = React.useRef(null);
-
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [pagesAnchorEl, setPagesAnchorEl] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
+  const pagesBtnRef = useRef(null);
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobilePagesOpen, setMobilePagesOpen] = useState(false);
 
-  // Handlers for Grocery dropdown
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // screen < md
+
+  // Grocery dropdown handlers
   const openGrocery = (event) => setAnchorEl(event.currentTarget);
   const closeGrocery = () => setAnchorEl(null);
 
-  // Handlers for Pages dropdown
+  // Pages dropdown handlers (desktop)
   const openPages = (el) => setPagesAnchorEl(el);
   const closePages = () => setPagesAnchorEl(null);
 
-  // Detect scroll to add shadow and background color to AppBar
+  // Scroll detection
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Common styles for navigation buttons (Shops, Offers, Contact, Pages)
   const navSx = {
     color: "rgba(55,65,81,1)",
     textTransform: "none",
@@ -46,6 +60,16 @@ export default function Header() {
     },
   };
 
+  const pages = [
+    "Flash Sale",
+    "Manufacturers/Publishers",
+    "Authors",
+    "FAQ",
+    "Terms & Conditions",
+    "Customer Refund Policy",
+    "Vendor Refund Policy",
+  ];
+
   return (
     <AppBar
       position="sticky"
@@ -53,22 +77,18 @@ export default function Header() {
       sx={{
         backgroundColor: scrolled ? "white" : "transparent",
         transition: "all 0.3s ease",
+        // Reduce vertical padding on small screens
+        py: { xs: 1, sm: 2 }, // xs = small screens: 1 unit (~8px), sm+ = 2 units (~16px)
       }}
-      className="py-2 z-50"
+      className="z-50"
     >
       <Toolbar className="flex justify-between">
-        {/* ================= Left Section: Logo + Grocery ================= */}
+        {/* Left: Logo + Grocery */}
         <Box className="flex items-center space-x-4">
-          {/* Logo */}
           <Link to="/">
-            <img
-              src={Logo}
-              alt="PickBazar Logo"
-              className="h-8 w-auto cursor-pointer"
-            />
+            <img src={Logo} alt="Logo" className="h-8 w-auto cursor-pointer" />
           </Link>
 
-          {/* Grocery dropdown button */}
           <Button
             variant="outlined"
             onClick={openGrocery}
@@ -87,184 +107,204 @@ export default function Header() {
           >
             Grocery
           </Button>
-          {/* Grocery dropdown menu */}
+
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={closeGrocery}
             disableScrollLock
           >
-            <MenuItem
-              onClick={closeGrocery}
-              sx={{
-                "&:hover": { color: "#0e544d", backgroundColor: "transparent" },
-              }}
-            >
-              Fruits
-            </MenuItem>
-            <MenuItem
-              onClick={closeGrocery}
-              sx={{
-                "&:hover": { color: "#0e544d", backgroundColor: "transparent" },
-              }}
-            >
-              Vegetables
-            </MenuItem>
-            <MenuItem
-              onClick={closeGrocery}
-              sx={{
-                "&:hover": { color: "#0e544d", backgroundColor: "transparent" },
-              }}
-            >
-              Snacks
-            </MenuItem>
+            {["Fruits", "Vegetables", "Snacks"].map((item) => (
+              <MenuItem
+                key={item}
+                onClick={closeGrocery}
+                sx={{
+                  "&:hover": {
+                    color: "#0e544d",
+                    backgroundColor: "transparent",
+                  },
+                }}
+              >
+                {item}
+              </MenuItem>
+            ))}
           </Menu>
         </Box>
 
-        {/* ================= Right Section: Nav Links + Action Buttons ================= */}
+        {/* Right: Nav Links / Buttons */}
         <Box className="flex items-center text-gray-700">
-          {/* Nav Links (hidden on small screens) */}
-          <Box className="hidden md:flex space-x-6 mr-10">
-            <Button component={Link} to="/shops" sx={navSx}>
-              Shops
-            </Button>
-            <Button component={Link} to="/offers" sx={navSx}>
-              Offers
-            </Button>
-            <Button component={Link} to="/contact" sx={navSx}>
-              Contact
-            </Button>
+          {!isMobile && (
+            <>
+              {/* Desktop Nav Links */}
+              <Box className="flex space-x-6 mr-10">
+                <Button component={Link} to="/shops" sx={navSx}>
+                  Shops
+                </Button>
+                <Button component={Link} to="/offers" sx={navSx}>
+                  Offers
+                </Button>
+                <Button component={Link} to="/contact" sx={navSx}>
+                  Contact
+                </Button>
 
-            {/* Pages dropdown (hoverable) */}
-            <Box
-              onMouseEnter={() => openPages(pagesBtnRef.current)}
-              onMouseLeave={closePages}
-              className="relative"
+                <Box
+                  onMouseEnter={() => openPages(pagesBtnRef.current)}
+                  onMouseLeave={closePages}
+                  className="relative"
+                >
+                  <Button
+                    ref={pagesBtnRef}
+                    color="inherit"
+                    endIcon={<ArrowDropDownIcon />}
+                    sx={navSx}
+                  >
+                    Pages
+                  </Button>
+
+                  <Menu
+                    anchorEl={pagesAnchorEl}
+                    open={Boolean(pagesAnchorEl)}
+                    onClose={closePages}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                    transformOrigin={{ vertical: "top", horizontal: "left" }}
+                    disableScrollLock
+                    MenuListProps={{
+                      onMouseEnter: () => openPages(pagesBtnRef.current),
+                      onMouseLeave: closePages,
+                      sx: { backgroundColor: "white" },
+                    }}
+                  >
+                    {pages.map((page) => (
+                      <MenuItem
+                        key={page}
+                        onClick={closePages}
+                        sx={{
+                          "&:hover": {
+                            color: "#0e544d",
+                            backgroundColor: "transparent",
+                          },
+                        }}
+                      >
+                        {page}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </Box>
+              </Box>
+
+              {/* Desktop Buttons */}
+              <Box className="flex items-center">
+                <Button
+                  variant="contained"
+                  className="!bg-[#10645b] hover:!bg-[#0e544d] normal-case rounded-lg shadow-none !mr-5"
+                  sx={{ textTransform: "none" }}
+                  onClick={() => setShowSignIn(true)}
+                >
+                  Join
+                </Button>
+                <Button
+                  variant="contained"
+                  className="!bg-[#10645b] hover:!bg-[#0e544d] normal-case rounded-lg shadow-none"
+                  sx={{ textTransform: "none" }}
+                >
+                  Become a Seller
+                </Button>
+              </Box>
+            </>
+          )}
+
+          {/* Mobile Hamburger */}
+          {isMobile && (
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={() => setMobileOpen(true)}
             >
-              <Button
-                ref={pagesBtnRef}
-                color="inherit"
-                endIcon={<ArrowDropDownIcon />}
-                sx={navSx}
-              >
-                Pages
-              </Button>
-
-              {/* Pages dropdown menu */}
-              <Menu
-                anchorEl={pagesAnchorEl}
-                open={Boolean(pagesAnchorEl)}
-                onClose={closePages}
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
-                disableScrollLock
-                MenuListProps={{
-                  onMouseEnter: () => openPages(pagesBtnRef.current),
-                  onMouseLeave: closePages,
-                  sx: { backgroundColor: "white" },
-                }}
-              >
-                <MenuItem
-                  onClick={closePages}
-                  sx={{
-                    "&:hover": {
-                      color: "#0e544d",
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  Flash Sale
-                </MenuItem>
-                <MenuItem
-                  onClick={closePages}
-                  sx={{
-                    "&:hover": {
-                      color: "#0e544d",
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  Manufacturers/Publishers
-                </MenuItem>
-                <MenuItem
-                  onClick={closePages}
-                  sx={{
-                    "&:hover": {
-                      color: "#0e544d",
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  Authors
-                </MenuItem>
-                <MenuItem
-                  onClick={closePages}
-                  sx={{
-                    "&:hover": {
-                      color: "#0e544d",
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  FAQ
-                </MenuItem>
-                <MenuItem
-                  onClick={closePages}
-                  sx={{
-                    "&:hover": {
-                      color: "#0e544d",
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  Terms & Conditions
-                </MenuItem>
-                <MenuItem
-                  onClick={closePages}
-                  sx={{
-                    "&:hover": {
-                      color: "#0e544d",
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  Customer Refund Policy
-                </MenuItem>
-                <MenuItem
-                  onClick={closePages}
-                  sx={{
-                    "&:hover": {
-                      color: "#0e544d",
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  Vendor Refund Policy
-                </MenuItem>
-              </Menu>
-            </Box>
-          </Box>
-
-          {/* Action Buttons (Join / Become a Seller) */}
-          <Button
-            variant="contained"
-            className="!bg-[#10645b] hover:!bg-[#0e544d] normal-case rounded-lg shadow-none !mr-5"
-            sx={{ textTransform: "none" }}
-            onClick={() => setShowSignIn(true)}
-          >
-            Join
-          </Button>
-
-          <Button
-            variant="contained"
-            className="!bg-[#10645b] hover:!bg-[#0e544d] normal-case rounded-lg shadow-none"
-            sx={{ textTransform: "none" }}
-          >
-            Become a Seller
-          </Button>
+              <MenuIcon sx={{ color: "#10645b" }} />
+            </IconButton>
+          )}
         </Box>
       </Toolbar>
-      {/* ===== Modals ===== */}
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+      >
+        <Box sx={{ width: 250, padding: 2 }}>
+          <List>
+            <ListItem
+              button
+              component={Link}
+              to="/shops"
+              onClick={() => setMobileOpen(false)}
+            >
+              <ListItemText primary="Shops" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/offers"
+              onClick={() => setMobileOpen(false)}
+            >
+              <ListItemText primary="Offers" />
+            </ListItem>
+            <ListItem
+              button
+              component={Link}
+              to="/contact"
+              onClick={() => setMobileOpen(false)}
+            >
+              <ListItemText primary="Contact" />
+            </ListItem>
+
+            {/* Pages with collapsible menu */}
+            <ListItem
+              button
+              onClick={() => setMobilePagesOpen(!mobilePagesOpen)}
+            >
+              <ListItemText primary="Pages" />
+              <ArrowDropDownIcon />
+            </ListItem>
+            <Collapse in={mobilePagesOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding sx={{ pl: 4 }}>
+                {pages.map((page) => (
+                  <ListItem
+                    button
+                    key={page}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <ListItemText primary={page} />
+                  </ListItem>
+                ))}
+              </List>
+            </Collapse>
+          </List>
+
+          <Box className="flex flex-col gap-3 mt-4">
+            <Button
+              variant="contained"
+              className="!bg-[#10645b] hover:!bg-[#0e544d]"
+              onClick={() => {
+                setShowSignIn(true);
+                setMobileOpen(false);
+              }}
+            >
+              Join
+            </Button>
+            <Button
+              variant="contained"
+              className="!bg-[#10645b] hover:!bg-[#0e544d]"
+            >
+              Become a Seller
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
+
+      {/* Modals */}
       {showSignIn && (
         <SignInModal
           onClose={() => setShowSignIn(false)}
@@ -274,7 +314,6 @@ export default function Header() {
           }}
         />
       )}
-
       {showSignUp && (
         <SignUpModal
           onClose={() => setShowSignUp(false)}
